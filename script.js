@@ -1,30 +1,29 @@
-// === Dark / Light Mode ===
-function toggleMode() {
-  const isDark = document.body.classList.toggle("dark-mode");
-  document.querySelector(".mode-icon").textContent = isDark ? "☀️" : "🌙";
-  localStorage.setItem("theme", isDark ? "dark" : "light");
+// 1. Select the toggle button and the icon
+// We use querySelector to find the classes you already have in your HTML
+const modeToggle = document.querySelector(".mode-toggle");
+const modeIcon = document.querySelector(".mode-icon");
+
+// 2. RUN IMMEDIATELY: Check if the user had Dark Mode saved before
+// This makes sure the theme stays active when you refresh the page
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark-mode");
+  modeIcon.textContent = "☀️";
 }
 
-(function () {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-    document.querySelector(".mode-icon").textContent = "☀️";
-  }
-})();
+// 3. THE EVENT: What happens when you click the button
+modeToggle.addEventListener("click", function() {
+  // Toggle the "dark-mode" class on the body (matches your CSS)
+  document.body.classList.toggle("dark-mode");
 
-// === Dark / Light Mode ===
-function toggleMode() {
-  const isDark = document.body.classList.toggle("dark-mode");
-  document.querySelector(".mode-icon").textContent = isDark ? "☀️" : "🌙";
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-}
-
-(function () {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-    document.querySelector(".mode-icon").textContent = "☀️";
+  // Check if it's currently dark or light to save the setting
+  if (document.body.classList.contains("dark-mode")) {
+    modeIcon.textContent = "☀️";
+    localStorage.setItem("theme", "dark");
+  } else {
+    modeIcon.textContent = "🌙";
+    localStorage.setItem("theme", "light");
   }
-})();
+});
 
 // === Standard Function  ===
 function standardFunction() {
