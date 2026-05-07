@@ -1,11 +1,10 @@
-// === Dark / Light Mode Script — place before </body> ===
+// === Dark / Light Mode ===
 function toggleMode() {
   const isDark = document.body.classList.toggle("dark-mode");
   document.querySelector(".mode-icon").textContent = isDark ? "☀️" : "🌙";
   localStorage.setItem("theme", isDark ? "dark" : "light");
 }
 
-// Remember preference on page reload
 (function () {
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark-mode");
@@ -13,68 +12,97 @@ function toggleMode() {
   }
 })();
 
-// Standard Function
+// === Dark / Light Mode ===
+function toggleMode() {
+  const isDark = document.body.classList.toggle("dark-mode");
+  document.querySelector(".mode-icon").textContent = isDark ? "☀️" : "🌙";
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+}
+
+(function () {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+    document.querySelector(".mode-icon").textContent = "☀️";
+  }
+})();
+
+// === Standard Function  ===
 function standardFunction() {
   document.getElementById("standardContainer").style.display = "block";
   document.getElementById("metricContainer").style.display = "none";
 
-  const weightStandard = parseFloat(
-    document.getElementById("weightStandard").value,
-  ); // lbs
-  const heightStandardFeet = parseFloat(
-    document.getElementById("heightStandardFeet").value,
-  ); // ft
-  const heightStandardInches = parseFloat(
-    document.getElementById("heightStandardInches").value,
-  ); // in
+  const weight = parseFloat(document.getElementById("weightStandard").value);
+  const feet   = parseFloat(document.getElementById("heightStandardFeet").value) || 0;
+  const inches = parseFloat(document.getElementById("heightStandardInches").value) || 0;
+  const height = feet * 12 + inches;
 
-  const heightInInches = heightStandardFeet * 12 + heightStandardInches;
+  // convert to metric (only if values exist)
+  if (!isNaN(weight)) document.getElementById("weightMetric").value = (weight / 2.20462).toFixed(1);
+  if (height > 0)     document.getElementById("heightMetric").value = (height * 2.54).toFixed(1);
 
-  return { weight: weightStandard, height: heightInInches }; // ✅ return values
+  return { weight, height };
 }
 
-// Metric Function
+// === Metric Function  ===
 function metricFunction() {
   document.getElementById("standardContainer").style.display = "none";
   document.getElementById("metricContainer").style.display = "block";
 
-  const weightMetric = parseFloat(
-    document.getElementById("weightMetric").value,
-  ); // kg
-  const heightMetric = parseFloat(
-    document.getElementById("heightMetric").value,
-  ); // m
+  const kg = parseFloat(document.getElementById("weightMetric").value);
+  const cm = parseFloat(document.getElementById("heightMetric").value);
 
-  return { weight: weightMetric, height: heightMetric }; // ✅ return values
+  // convert to standard (only if values exist)
+  if (!isNaN(kg)) {
+    document.getElementById("weightStandard").value = (kg * 2.20462).toFixed(1);
+  }
+  if (!isNaN(cm)) {
+    const totalInches = cm / 2.54;
+    document.getElementById("heightStandardFeet").value   = Math.floor(totalInches / 12);
+    document.getElementById("heightStandardInches").value = (totalInches % 12).toFixed(1);
+  }
+
+  return { weight: kg, height: cm / 100 };
 }
 
-// Calculate BMI
+// === Calculate BMI with validation  ===
 function calculateBMI() {
-  let weight, height, bmi;
+  let result, bmi;
 
-  // ✅ declare variables outside the if blocks so they're accessible below
   if (document.getElementById("btnstandard").checked) {
-    ({ weight, height } = standardFunction());
-    bmi = (weight / (height * height)) * 703; // ✅ correct imperial formula
-  } else if (document.getElementById("btnmetric").checked) {
-    ({ weight, height } = metricFunction());
-    bmi = weight / (height * height); // metric formula unchanged
+    const weight = parseFloat(document.getElementById("weightStandard").value);
+    const feet   = parseFloat(document.getElementById("heightStandardFeet").value) || 0;
+    const inches = parseFloat(document.getElementById("heightStandardInches").value) || 0;
+
+    if (isNaN(weight) || weight <= 0) { alert("Please enter a valid weight."); return; }
+    if (weight > 1400)                { alert("Weight value is too high."); return; }
+    if (feet <= 0 && inches <= 0)     { alert("Please enter a valid height."); return; }
+    if (feet > 9)                     { alert("Feet value is too high."); return; }
+    if (inches >= 12)                 { alert("Inches must be less than 12."); return; }
+
+    result = standardFunction();
+    bmi = (result.weight / (result.height * result.height)) * 703;
+
+  } else {
+    const kg = parseFloat(document.getElementById("weightMetric").value);
+    const cm = parseFloat(document.getElementById("heightMetric").value);
+
+    if (isNaN(kg) || kg <= 0) { alert("Please enter a valid weight."); return; }
+    if (kg > 635)             { alert("Weight value is too high."); return; }
+    if (isNaN(cm) || cm <= 0) { alert("Please enter a valid height."); return; }
+    if (cm > 272)             { alert("Height value is too high."); return; }
+
+    result = metricFunction();
+    bmi = result.weight / (result.height * result.height);
   }
 
-  // display the bmi result
-  document.getElementById("bmiValue").textContent = `${bmi.toFixed(2)}`;
-  bmiCategory.textContent = getBMICategory(bmi);
+  document.getElementById("bmiValue").textContent    = bmi.toFixed(2);
+  document.getElementById("bmiCategory").textContent = getBMICategory(bmi);
+}
 
-  // Determine BMI category
-  function getBMICategory(bmi) {
-    if (bmi < 18.5) {
-      return "Underweight";
-    } else if (bmi >= 18.5 && bmi < 24.9) {
-      return "Normal weight";
-    } else if (bmi >= 25 && bmi < 29.9) {
-      return "Overweight";
-    } else {
-      return "Obese";
-    }
-  }
+// === BMI Category ===
+function getBMICategory(bmi) {
+  if (bmi < 18.5) return "Underweight";
+  if (bmi < 24.9) return "Normal weight";
+  if (bmi < 29.9) return "Overweight";
+  return "Obese";
 }
