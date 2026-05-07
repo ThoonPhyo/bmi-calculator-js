@@ -101,8 +101,13 @@ function calculateBMI() {
 
 // === BMI Category ===
 function getBMICategory(bmi) {
-  if (bmi < 18.5) return "Underweight";
-  if (bmi < 24.9) return "Normal weight";
-  if (bmi < 29.9) return "Overweight";
-  return "Obese";
+  const card = document.querySelector(".card");
+
+  // reset all category classes first
+  card.classList.remove("underweight", "normal", "overweight", "obese");
+
+  if (bmi < 18.5) { card.classList.add("underweight"); return "Underweight"; }
+  if (bmi < 24.9) { card.classList.add("normal");      return "Normal weight"; }
+  if (bmi < 29.9) { card.classList.add("overweight");  return "Overweight"; }
+                    card.classList.add("obese");        return "Obese";
 }
